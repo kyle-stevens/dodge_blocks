@@ -25,8 +25,12 @@ class Player:
         self.left = left
         self.up = up
         self.down = down
+    def colliding(self, enemy):
+        xvals = self.x+self.width
+        yvals = self.y+self.height
 
 class Enemy:
+    key = 0
     x = 0
     y = 0
     width = 0
@@ -36,8 +40,9 @@ class Enemy:
     up = False
     down = False
     speed = 0
-    def __init__(self):
-        self.speed = 1#random.randint(1,10)
+    def __init__(self, key):
+        self.key = key
+        self.speed = random.randint(1,5)
         self.x = random.randint(0,700)
         self.y = 0
         self.width = 10
@@ -49,22 +54,6 @@ class Enemy:
         else:
             self.left = True
 
-    def collision(self, other):
-        if self.x == (other.x) or (self.x ) == other.x:
-            tempright = self.right
-            templeft = self.left
-            self.right = other.right
-            self.left = other.left
-            other.right = tempright
-            other.left = templeft
-
-        elif self.y == (other.y) or (self.y)==other.y:
-            tempup = self.up
-            tempdown = self.down
-            self.up = other.up
-            self.down = other.down
-            other.up = tempup
-            other.down = tempdown
 
 
 
@@ -92,21 +81,32 @@ def sprite2(x, y, width, height, DISPLAY):
 
 #game loop
 running = True
+killed = False
 clock = pygame.time.Clock()
 
 
 p=Player(displayx,displayy,25,25,1,False,False,True,False)
-e=[Enemy()]
+e=[Enemy(0),Enemy(1),Enemy(2),Enemy(3)]
 while running:
     pygame.init()
     pygame.font.init()
+    clock.tick(48)  # 48 is normval
     font = pygame.font.Font('freesansbold.ttf', 32)
-    text = font.render(str(round), True, black)
+    if not killed:
+        text = font.render(str(round), True, black)
+    else:
+        p.speed = 0
+        for enemy in e:
+            enemy.speed = 0
+        text = font.render("GAME OVER", True, black)
+        pygame.display.update()
+        pygame.time.delay(6000)
+
     round+=1
     textRect = text.get_rect()
     textRect.center = (displayx // 2, displayy // 2)
     if round % int(1000/len(e)) ==0 and len(e) < 25:
-        e.append(Enemy())
+        e.append(Enemy(len(e)))
         if p.speed < 3:
             p.speed += 1
 
@@ -143,7 +143,8 @@ while running:
     for event in pygame.event.get():
         if event.type == QUIT:
             running = False
-            pygame.quit()
+            #pygame.quit()
+
     if event.type == pygame.KEYDOWN:
         '''if event.key == pygame.K_RIGHT and p.right:
             p.right = False
@@ -189,12 +190,6 @@ while running:
         p.y = p.y+p.speed
 
 
-    for elem in e:
-        thiselem = elem
-        nextelem = e[e.index(elem) - len(e) + 1]
-        thiselem.collision(nextelem)
-        #taken from ignoramus on stack overflow
-
     for enemy in e:
 
         #create bounds for enemies
@@ -214,7 +209,7 @@ while running:
             # to create boundaries
             enemy.up = False
             enemy.down = True
-    
+
         #enemymotion
         if enemy.left and enemy.up:
             enemy.x = enemy.x-enemy.speed
@@ -236,19 +231,18 @@ while running:
             enemy.y = enemy.y-enemy.speed
         elif enemy.down:
             enemy.y = enemy.y+enemy.speed
-    
+
+
+    #player/enemy collision call
+    for enemy in e:
+        p.colliding(enemy)
 
     #pygame.time.delay(1)
     pygame.display.update()
-    clock.tick(48)
-'''needs work for collision detection
+
+
     for enemy in e:
-        if enemy.x < (p.x+25):
-            if enemy.x > p.x:
-                if enemy.y < (p.y+25):
-                    if enemy.y< p.y:
-                        text = font.render("Game Over", True, red)
-                        textRect = text.get_rect()
-                        textRect.center = (displayx // 2, displayy // 2)
-                        pygame.time.delay(10)
-'''
+        if (enemy.x < p.x + p.width) and (enemy.x + enemy.width > p.x) and (enemy.y < p.y + p.height) and (enemy.y + enemy.height > p.y):
+            killed = True
+
+
