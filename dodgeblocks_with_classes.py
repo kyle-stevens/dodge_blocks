@@ -1,9 +1,6 @@
 import pygame,sys
 from pygame.locals import *
-
 import random
-
-
 
 class Player:
     x=0
@@ -25,9 +22,6 @@ class Player:
         self.left = left
         self.up = up
         self.down = down
-    def colliding(self, enemy):
-        xvals = self.x+self.width
-        yvals = self.y+self.height
 
 class Enemy:
     key = 0
@@ -54,68 +48,44 @@ class Enemy:
         else:
             self.left = True
 
-
-
-
-
-
 black = (0,0,0)
 red = (255,0,0)
 grey = (150,150,150)
 white = (255,255,255)
 blue = (0,0,255)
 
-displayx = 1080
-displayy = 500
-
-round = 1
-
-
 def sprite(x, y, width, height, DISPLAY, color):
     pygame.draw.rect(DISPLAY, color, (x, y, width, height))
+
 def sprite2(x, y, width, height, DISPLAY):
     pygame.draw.rect(DISPLAY, black, (x, y, width, height))
 
-
-
-
-
 def gameLoop():
-
     displayx = 1080
     displayy = 500
-    white = True
     round = 1
 
     # game loop
     running = True
     killed = False
     clock = pygame.time.Clock()
+    
     p=Player(displayx,displayy,25,25,1,False,True,True,False)
     e=[Enemy(0)]
+    
     while running:
         pygame.init()
         pygame.font.init()
+    
         clock.tick(48)  # 48 is normval
+    
         font = pygame.font.Font('freesansbold.ttf', 32)
-
-
         DISPLAY = pygame.display.set_mode((displayx, displayy))
         pygame.display.set_caption("Dodge Blocks")
-
         DISPLAY.fill(grey)
-        #changing background color
-
-
-
-
+        
         #animation handling
-
-
         sprite(p.x, p.y, p.width, p.height, DISPLAY, black)
-
-
-
         if p.up and p.left:
             sprite(p.x, p.y, p.width//2, p.height//2, DISPLAY, blue)
         elif p.up and p.right:
@@ -125,11 +95,8 @@ def gameLoop():
         elif p.down and p.right:
             sprite(p.x + (p.width // 2)+1, p.y + (p.height // 2)+1, p.width // 2, p.height // 2, DISPLAY, blue)
 
-
-
         for enemy in e:
             sprite2(enemy.x, enemy.y, enemy.width, enemy.height, DISPLAY)
-
             if enemy.up and enemy.left:
                 sprite(enemy.x + enemy.speed*(enemy.width * 1.5) + 1, enemy.y+1+enemy.speed*(enemy.height*1.5), enemy.width // 2, enemy.height // 2, DISPLAY, black)
             elif enemy.up and enemy.right:
@@ -141,8 +108,7 @@ def gameLoop():
                 sprite(enemy.x - enemy.speed*(enemy.width * 1.5) - 1, enemy.y - 1 - enemy.speed*(enemy.height * 1.5), enemy.width // 2,
                        enemy.height // 2, DISPLAY, black)
 
-        # create bounds for player
-
+        #check death
         if not killed:
             text0 = font.render("", True, (255, 255, 255))
             text = font.render(str(round), True, (255,255,255))
@@ -152,18 +118,15 @@ def gameLoop():
                 e.append(Enemy(len(e)))
                 if p.speed < 3:
                     p.speed += 1
-
-
-
         else:
-
             text0 = font.render(str(round), True, (255, 255, 255))
             text = font.render("GAME OVER", True, (255,255,255))
             text2 = font.render("Press Space to Restart", True, (255,255,255))
             p.speed = 0
             for enemy in e:
                 enemy.speed = 0
-
+        
+        #define text displays and screen
         text0Rect = text0.get_rect()
         text0Rect.center = (displayx // 2, displayy // 2 - 40)
         textRect = text.get_rect()
@@ -174,32 +137,27 @@ def gameLoop():
         DISPLAY.blit(text2, text2Rect)
         DISPLAY.blit(text0, text0Rect)
 
-        # display
+        #set player bounds
         if p.x > (displayx - (p.width)):
-            # to create boundaries
             p.right = False
             p.left = True
         elif p.x < 0:
-            # to create boundaries
             p.left = False
             p.right = True
         if p.y > (displayy - p.height):
-            # to create boundaries
             p.down = False
             p.up = True
         elif p.y < 0:
-            # to create boundaries
             p.up = False
             p.down = True
-
 
         #commands
         for event in pygame.event.get():
             if event.type == QUIT:
                 running = False
                 #pygame.quit()
-
         if event.type == pygame.KEYDOWN:
+            #this is for extra control, allowing for vertical and horizontal motion///not intuitive enough to be effective
             '''if event.key == pygame.K_RIGHT and p.right:
                 p.right = False
             elif event.key == pygame.K_LEFT and p.left:
@@ -250,7 +208,6 @@ def gameLoop():
 
 
         for enemy in e:
-
             #create bounds for enemies
             if enemy.x > (displayx - (enemy.width)):
                 # to create boundaries
@@ -268,7 +225,6 @@ def gameLoop():
                 # to create boundaries
                 enemy.up = False
                 enemy.down = True
-
             #enemymotion
             if enemy.left and enemy.up:
                 enemy.x = enemy.x-enemy.speed
@@ -290,17 +246,14 @@ def gameLoop():
                 enemy.y = enemy.y-enemy.speed
             elif enemy.down:
                 enemy.y = enemy.y+enemy.speed
-
-
-
         #pygame.time.delay(1)
         pygame.display.update()
 
-
+        #check for player/enemy collision
         for enemy in e:
             if (enemy.x < p.x + p.width) and (enemy.x + enemy.width > p.x) and (enemy.y < p.y + p.height) and (enemy.y + enemy.height > p.y):
                 killed = True
 
-
+#play
 while True:
     gameLoop()
