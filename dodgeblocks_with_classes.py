@@ -2,7 +2,7 @@ import pygame,sys
 from pygame.locals import *
 import os
 import random
-
+from itertools import cycle
 
 
 class Player:
@@ -63,6 +63,7 @@ black = (0,0,0)
 red = (255,0,0)
 grey = (150,150,150)
 white = (0,0,0)
+blue = (0,0,255)
 
 displayx = 1080
 displayy = 500
@@ -72,7 +73,7 @@ round = 1
 
 def sprite(x, y, width, height, DISPLAY):
     pygame.draw.rect(DISPLAY, black, (x, y, width, height))
-    pygame.draw.rect(DISPLAY, red, (x + 5, y + 5, width - 5, height - 5))
+    pygame.draw.rect(DISPLAY, blue, (x + 5, y + 5, width - 5, height - 5))
 def sprite2(x, y, width, height, DISPLAY):
     pygame.draw.rect(DISPLAY, black, (x, y, width, height))
 
@@ -92,35 +93,41 @@ while running:
     pygame.font.init()
     clock.tick(48)  # 48 is normval
     font = pygame.font.Font('freesansbold.ttf', 32)
+
+    DISPLAY = pygame.display.set_mode((displayx, displayy))
+    pygame.display.set_caption("tests")
+    DISPLAY.fill(grey)
+    sprite(p.x, p.y, p.width, p.height, DISPLAY)
+    for enemy in e:
+        sprite2(enemy.x, enemy.y, enemy.width, enemy.height, DISPLAY)
+    # create bounds for player
+
     if not killed:
-        text = font.render(str(round), True, black)
+        text = font.render(str(round), True, red)
+        text2 = font.render("", True, red)
+        round += 1
+        if round % int(1000 / len(e)) == 0 and len(e) < 25:
+            e.append(Enemy(len(e)))
+            if p.speed < 3:
+                p.speed += 1
+
+
+
     else:
         p.speed = 0
         for enemy in e:
             enemy.speed = 0
-        text = font.render("GAME OVER", True, black)
-        pygame.display.update()
-        pygame.time.delay(6000)
+        text = font.render("GAME OVER", True, red)
+        text2 = font.render("Press Space to Restart", True, red)
 
-    round+=1
     textRect = text.get_rect()
     textRect.center = (displayx // 2, displayy // 2)
-    if round % int(1000/len(e)) ==0 and len(e) < 25:
-        e.append(Enemy(len(e)))
-        if p.speed < 3:
-            p.speed += 1
-
-
+    text2Rect = text2.get_rect()
+    text2Rect.center = (displayx // 2, displayy // 2 + 40)
+    DISPLAY.blit(text, textRect)
+    DISPLAY.blit(text2, text2Rect)
 
     # display
-    DISPLAY = pygame.display.set_mode((displayx, displayy))
-    pygame.display.set_caption("tests")
-    DISPLAY.fill(grey)
-    DISPLAY.blit(text, textRect)
-    sprite(p.x, p.y, p.width, p.height, DISPLAY)
-    for enemy in e:
-        sprite2(enemy.x,enemy.y,enemy.width,enemy.height,DISPLAY)
-    #create bounds for player
     if p.x > (displayx - (p.width)):
         # to create boundaries
         p.right = False
@@ -166,6 +173,18 @@ while running:
         elif event.key == pygame.K_DOWN:
             p.up = False
             p.down = True
+        elif event.key == pygame.K_SPACE:
+            running = True
+            killed = False
+            for enemy in e:
+                del(enemy)
+            e.append(Enemy(0))
+            p.y = displayy/2
+            p.x = displayx/2
+            print (p.x)
+            print(p.y)
+            p.speed = 1
+
 
     #handle motion
     if p.left and p.up:
@@ -233,14 +252,14 @@ while running:
             enemy.y = enemy.y+enemy.speed
 
 
-    #player/enemy collision call
-    for enemy in e:
-        p.colliding(enemy)
 
     #pygame.time.delay(1)
     pygame.display.update()
 
 
+    for enemy in e:
+        if (enemy.x < p.x + p.width) and (enemy.x + enemy.width > p.x) and (enemy.y < p.y + p.height) and (enemy.y + enemy.height > p.y):
+            killed = True
     for enemy in e:
         if (enemy.x < p.x + p.width) and (enemy.x + enemy.width > p.x) and (enemy.y < p.y + p.height) and (enemy.y + enemy.height > p.y):
             killed = True
