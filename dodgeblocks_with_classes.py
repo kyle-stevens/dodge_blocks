@@ -71,9 +71,8 @@ displayy = 500
 round = 1
 
 
-def sprite(x, y, width, height, DISPLAY):
-    pygame.draw.rect(DISPLAY, black, (x, y, width, height))
-    pygame.draw.rect(DISPLAY, blue, (x + 5, y + 5, width - 5, height - 5))
+def sprite(x, y, width, height, DISPLAY, color):
+    pygame.draw.rect(DISPLAY, color, (x, y, width, height))
 def sprite2(x, y, width, height, DISPLAY):
     pygame.draw.rect(DISPLAY, black, (x, y, width, height))
 
@@ -92,7 +91,7 @@ def gameLoop():
     running = True
     killed = False
     clock = pygame.time.Clock()
-    p=Player(displayx,displayy,25,25,1,False,False,True,False)
+    p=Player(displayx,displayy,25,25,1,False,True,True,False)
     e=[Enemy(0)]
     while running:
         pygame.init()
@@ -100,12 +99,48 @@ def gameLoop():
         clock.tick(48)  # 48 is normval
         font = pygame.font.Font('freesansbold.ttf', 32)
 
+
         DISPLAY = pygame.display.set_mode((displayx, displayy))
-        pygame.display.set_caption("tests")
+        pygame.display.set_caption("Dodge Blocks")
+
         DISPLAY.fill(grey)
-        sprite(p.x, p.y, p.width, p.height, DISPLAY)
+        #changing background color
+
+
+
+
+        #animation handling
+
+
+        sprite(p.x, p.y, p.width, p.height, DISPLAY, black)
+
+
+
+        if p.up and p.left:
+            sprite(p.x, p.y, p.width//2, p.height//2, DISPLAY, blue)
+        elif p.up and p.right:
+            sprite(p.x+(p.width//2)+1, p.y, p.width//2, p.height//2, DISPLAY, blue)
+        elif p.down and p.left:
+            sprite(p.x, p.y+(p.height//2)+1, p.width // 2, p.height // 2, DISPLAY, blue)
+        elif p.down and p.right:
+            sprite(p.x + (p.width // 2)+1, p.y + (p.height // 2)+1, p.width // 2, p.height // 2, DISPLAY, blue)
+
+
+
         for enemy in e:
             sprite2(enemy.x, enemy.y, enemy.width, enemy.height, DISPLAY)
+
+            if enemy.up and enemy.left:
+                sprite(enemy.x + enemy.speed*(enemy.width * 1.5) + 1, enemy.y+1+enemy.speed*(enemy.height*1.5), enemy.width // 2, enemy.height // 2, DISPLAY, black)
+            elif enemy.up and enemy.right:
+                sprite(enemy.x - enemy.speed*(enemy.width * 1.5) - 1, enemy.y+1+enemy.speed*(enemy.height*1.5), enemy.width // 2, enemy.height // 2, DISPLAY, black)
+            elif enemy.down and enemy.left:
+                sprite(enemy.x + enemy.speed*(enemy.width * 1.5) + 1, enemy.y - 1 - enemy.speed*(enemy.height * 1.5), enemy.width // 2,
+                       enemy.height // 2, DISPLAY, black)
+            elif enemy.down and enemy.right:
+                sprite(enemy.x - enemy.speed*(enemy.width * 1.5) - 1, enemy.y - 1 - enemy.speed*(enemy.height * 1.5), enemy.width // 2,
+                       enemy.height // 2, DISPLAY, black)
+
         # create bounds for player
 
         if not killed:
