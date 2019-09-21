@@ -87,6 +87,7 @@ def gameLoop():
         DISPLAY.fill(grey)
         
         #animation handling
+
         sprite(p.x, p.y, p.width, p.height, DISPLAY, black)
         if p.up and p.left:
             sprite(p.x, p.y, p.width//2, p.height//2, DISPLAY, blue)
@@ -168,16 +169,16 @@ def gameLoop():
                 p.down = False
             elif event.key == pygame.K_UP and p.up:
                 p.up = False'''
-            if event.key == pygame.K_LEFT:
+            if event.key == pygame.K_LEFT and not killed:
                 p.right = False
                 p.left = True
-            elif event.key == pygame.K_RIGHT:
+            elif event.key == pygame.K_RIGHT and not killed:
                 p.left = False
                 p.right = True
-            elif event.key == pygame.K_UP:
+            elif event.key == pygame.K_UP and not killed:
                 p.down = False
                 p.up = True
-            elif event.key == pygame.K_DOWN:
+            elif event.key == pygame.K_DOWN and not killed:
                 p.up = False
                 p.down = True
             elif event.key == pygame.K_SPACE:
